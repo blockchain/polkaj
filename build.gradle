@@ -18,7 +18,7 @@ apply plugin: 'jacoco'
 
 allprojects {
     group = 'io.emeraldpay.polkaj'
-    version = "0.4.0-SNAPSHOT"
+    version = "0.4.0.1-SNAPSHOT"
 
     repositories {
         mavenLocal()
@@ -37,7 +37,6 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'groovy'
     apply plugin: 'jacoco'
-    apply plugin: 'com.jfrog.bintray'
 
     targetCompatibility = '11'
     sourceCompatibility = '11'
@@ -121,35 +120,14 @@ subprojects {
                 }
             }
         }
-    }
 
-    bintray {
-        user = System.getenv('BINTRAY_USER')
-        key = System.getenv('BINTRAY_API_KEY')
-
-        dryRun=false
-        publish=true
-        override=true
-
-        publications = ['mavenJava']
-
-        pkg {
-            userOrg = 'emerald'
-            repo = 'polkaj'
-            name = project.name
-            licenses = ['Apache-2.0']
-            vcsUrl = 'https://github.com/emeraldpay/polkaj.git'
-            labels = ['polkadot', 'blockchain']
-            publicDownloadNumbers = true
-
-            version {
-                name = project.version
-                description = 'PolkaJ ' + project.version
-                released  = new Date()
-                vcsTag = project.version
-
-                gpg {
-                    sign = true
+        repositories {
+            project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
+            maven {
+                url "${nexusUrl}/repository/maven-${project.repo}/"
+                credentials(PasswordCredentials) {
+                    username nexusUsername
+                    password nexusPassword
                 }
             }
         }
@@ -178,20 +156,4 @@ task syncJars(type: Sync) {
         from p.tasks.withType(Jar)
     }
     into "${buildDir}/libs/"
-}
-
-// Skip Bintray for the root module
-bintray {
-    dryRun=true
-    publish=false
-    override=true
-    publications = []
-    configurations = []
-    pkg {
-        repo = 'none'
-        name = 'none'
-        version {
-            name = 'none'
-        }
-    }
 }
