@@ -13,13 +13,14 @@ public class MetadataReader implements ScaleReader<Metadata> {
     public static final ListReader<Metadata.Module> MODULE_LIST_READER = new ListReader<>(new ModulesReader());
     public static final ListReader<String> STRING_LIST_READER = new ListReader<>(ScaleCodecReader.STRING);
     public static final EnumReader<Metadata.Storage.Hasher> HASHER_ENUM_READER = new EnumReader<>(Metadata.Storage.Hasher.values());
+    public static final ListReader<Metadata.Storage.Hasher> HASHER_ENUM_LIST_READER = new ListReader<>(new EnumReader<>(Metadata.Storage.Hasher.values()));
 
     @Override
     public Metadata read(ScaleCodecReader rdr) {
         Metadata result = new Metadata();
         result.setMagic(ScaleCodecReader.INT32.read(rdr));
         result.setVersion(rdr.readUByte());
-        if (result.getVersion() != 12) {
+        if (result.getVersion() != 13) {
             throw new IllegalStateException("Unsupported metadata version: " + result.getVersion());
         }
         result.setModules(MODULE_LIST_READER.read(rdr));
@@ -94,7 +95,8 @@ public class MetadataReader implements ScaleReader<Metadata> {
         private static final UnionReader<Metadata.Storage.Type<?>> TYPE_UNION_READER = new UnionReader<>(
                 new TypePlainReader(),
                 new TypeMapReader(),
-                new TypeDoubleMapReader()
+                new TypeDoubleMapReader(),
+                new TypeNMapReader()
         );
 
         @Override
@@ -134,6 +136,18 @@ public class MetadataReader implements ScaleReader<Metadata> {
             definition.setType(rdr.readString());
             definition.setSecondHasher(HASHER_ENUM_READER.read(rdr));
             return new Metadata.Storage.DoubleMapType(definition);
+        }
+    }
+
+    static class TypeNMapReader implements ScaleReader<Metadata.Storage.NMapType> {
+
+        @Override
+        public Metadata.Storage.NMapType read(ScaleCodecReader rdr) {
+            Metadata.Storage.NMapDefinition definition = new Metadata.Storage.NMapDefinition();
+            definition.setHashers(HASHER_ENUM_LIST_READER.read(rdr));
+            definition.setKeys(STRING_LIST_READER.read(rdr));
+            definition.setType(rdr.readString());
+            return new Metadata.Storage.NMapType(definition);
         }
     }
 

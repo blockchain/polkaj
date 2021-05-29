@@ -16,9 +16,9 @@ class MetadataReaderSpec extends Specification {
         def rdr = new ScaleCodecReader(data)
         def act = rdr.read(new MetadataReader())
         then:
-        act.version == 12
+        act.version == 13
         act.magic == 0x6174656d
-        act.modules.size() == 30
+        act.modules.size() == 51
         with(act.modules.find { it.name == "System"}) {
             with(calls[0]) {
                 name == "fill_block"
@@ -36,21 +36,15 @@ class MetadataReaderSpec extends Specification {
                     name == "_remark"
                     type == "Vec<u8>"
                 }
-                documentation == [" Make some on-chain remark.",
-                                  "",
-                                  " # <weight>",
-                                  " - `O(1)`",
-                                  " - Base Weight: 0.665 µs, independent of remark length.",
-                                  " - No DB operations.",
-                                  " # </weight>"]
+                documentation == [" Make some on-chain remark.", "", " # <weight>", " - `O(1)`", " # </weight>"]
             }
         }
         with(act.modules.find { it.name == "Treasury"}) {
             with(events[0]) {
                 name == "Proposed"
             }
-            with(constants.find {it.name == "ModuleId"}) {
-                type == "ModuleId"
+            with(constants.find {it.name == "PalletId"}) {
+                type == "PalletId"
                 new String(value) == "py/trsry"
             }
             with(constants.find {it.name == "ProposalBondMinimum"}) {
@@ -59,7 +53,7 @@ class MetadataReaderSpec extends Specification {
                     def copy = it.clone().toList()
                     Collections.reverse(copy)
                     ByteBuffer.wrap(copy.toArray() as byte[], 8, 8).long
-                } == 3333333333320L
+                } == 66666666000L
             }
         }
         with(act.modules.find { it.name == "Grandpa"}) {

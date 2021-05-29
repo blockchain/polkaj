@@ -282,7 +282,8 @@ public class Metadata {
         public static enum TypeId {
             PLAIN(String.class),
             MAP(MapDefinition.class),
-            DOUBLEMAP(DoubleMapDefinition.class);
+            DOUBLEMAP(DoubleMapDefinition.class),
+            NMAP(NMapDefinition.class);
 
             private final Class<?> clazz;
 
@@ -480,6 +481,62 @@ public class Metadata {
             @Override
             public TypeId getId() {
                 return TypeId.DOUBLEMAP;
+            }
+        }
+
+        public static class NMapDefinition {
+            private List<Hasher> hashers;
+            private List<String> keys;
+            private String type;
+
+            public List<Hasher> setHashers() {
+                return hashers;
+            }
+
+            public void setHashers(List<Hasher> hashers) {
+                this.hashers = hashers;
+            }
+
+            public List<String> getKeys() {
+                return keys;
+            }
+
+            public void setKeys(List<String> keys) {
+                this.keys = keys;
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
+
+            @Override
+            public final boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof NMapDefinition)) return false;
+                NMapDefinition that = (NMapDefinition) o;
+                return Objects.equals(hashers, that.hashers) &&
+                        Objects.equals(keys, that.keys) &&
+                        Objects.equals(type, that.type);
+            }
+
+            @Override
+            public final int hashCode() {
+                return Objects.hash(hashers, keys, type);
+            }
+        }
+
+        public static class NMapType extends Type<NMapDefinition> {
+            public NMapType(NMapDefinition value) {
+                super(value);
+            }
+
+            @Override
+            public TypeId getId() {
+                return TypeId.NMAP;
             }
         }
     }

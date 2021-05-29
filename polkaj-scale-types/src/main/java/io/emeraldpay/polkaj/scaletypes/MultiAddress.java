@@ -35,7 +35,7 @@ public abstract class MultiAddress {
      *
      * @param type a valid MultiAddress.Type constant
      * @param value concrete MultiAddress instance
-     * @return
+     * @return MultiAddress as a UnionValue
      */
     public static UnionValue<MultiAddress> from(int type, MultiAddress value) {
         return new UnionValue<>(type, value);
@@ -58,6 +58,8 @@ public abstract class MultiAddress {
 
         /**
          * Transforms a standard Address object into a fully wrapped MultiAddress UnionValue
+         * @param address normal Address instance
+         * @return MultiAddress as a UnionValue
          */
         public static UnionValue<MultiAddress> from(Address address) {
             return MultiAddress.from(Type.ID.getCode(), new AccountID(address));
